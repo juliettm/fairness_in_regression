@@ -4,6 +4,23 @@ The general procedure to measure fairness in regression problems is the followin
 
 ## Datasets
 
+
+| Output Type  | Dataset       | PA     | PV / UV                              | Variable to Predict      | FL      | Threshold | 
+|--------------|---------------|--------|--------------------------------------|--------------------------|---------|-----------|
+| Ordinal      | wine          | Color  | **Red - 1** / White - 0              | Quality [3-8]            | [6-8]   | 6         |
+|              | COMPAS        | Race   | **White - 1** / AA - 0               | Recidivism [1-10]        | [1-4]   | 5         |
+|              | singles       | Gender | **Male - 1** / Female - 0            | Income [1-9]             | [5-9]   | 5         |
+|              | obesity       | Gender | **Male - 1** / Female - 0            | Obesity [0-5]            | [0-3]   | 4         |
+|              | drugs         | Gender | **Female - 1** / Male - 0            | Coke Recency [0-6]       | [0-2]   | 3         |
+| Continuous   | insurance     | Gender | **Male - 1** / Female - 0            | Charges                  | `<= 40K`| 40K       |
+|              | parkinson     | Gender | **Male - 1** / Female - 0            | UPDRS score              | `< 17.1`| 17.1      |
+|              | older-adults  | Gender | **Male - 1** / Female - 0            | Mistakes                 | `< 8`   | 8         |
+|              | crime         | Race   | **White - 1** / Other - 0            | `%` Crimes               | `< 0.15`| 0.15      |
+|              | LSAC          | Race   | **White - 1** / Other - 0            | ugpa^1^                  | `>= 3.2`| 3.2       |
+|              | student       | Gender | **Female - 1** / Male - 0            | Final Grade              | `>= 12` | 12        |
+
+1: Undergraduate Grade Score Average
+
 ## Code
 
 ### 1. Discretisation results
