@@ -29,7 +29,7 @@ The file `discretising_values.py` contains the code for the computation of SP wi
 The figures can be found in the `plots/discretising` folder.
 The file `sp_discrete.txt` contains the results of the discretisation of the continuous features in the datasets.
 
-### 2. SP measures computation problems for binary and continuous outputs - Linear and Tree models
+### 2. SP measures computation for binary and continuous outputs - Linear and Tree models
 
 - **Running the experiments:**
 The file `experiment_linear.py` contains the code for the computation of SP in all datasets using the linear model.
