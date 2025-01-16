@@ -6,7 +6,7 @@ from aif360.metrics import BinaryLabelDatasetMetric, ClassificationMetric
 from sklearn.metrics import accuracy_score
 # metrics
 from sklearn.metrics import confusion_matrix as cm
-from sklearn.metrics import mean_absolute_error
+from sklearn.metrics import mean_absolute_error, mean_squared_error
 from datasets_processing.aif360datset import get_aif_dataset
 from sklearn.tree import DecisionTreeClassifier
 from methods.regression_measures import compute_sp_avg_outcome, normalisation
@@ -89,7 +89,9 @@ def apply_c45_classifier(dataset, splits=10, mitigation=False, rand_state=1):
     acc_m = []
     false_discovery_rate_difference = []
     sp_avg_outcome_n = []
+    sp_avg_outcome = []
     mae_n = []
+    mse = []
 
 
     for num in range(0, 10):
@@ -97,16 +99,16 @@ def apply_c45_classifier(dataset, splits=10, mitigation=False, rand_state=1):
         seed = 100 + num
 
         df_tra = pd.read_csv(
-            "/Users/juls/Desktop/BIAS- regression/compas_analysis/data/train_val_test/{}/{}_output_{}_train_seed_{}.csv".format(
-                dataset._name, dataset._name, dataset.outcome_type, seed))
+            "/Users/jsuarez/Documents/Personal/fairness_in_regression/data/train_val_test_standard/{}/{}_output_{}_{}_train_seed_{}.csv".format(
+                dataset._name, dataset._name, dataset.outcome_type, dataset._protected_att_name[0], seed))
 
         # df_tra_ = pd.read_csv( "/Users/juls/Desktop/BIAS- regression/compas_analysis/data/train_val_test/{}/{}_output_continuous_train_seed_{}.csv".format( dataset._name, dataset._name, seed))
 
         df_tst_b = pd.read_csv(
-            "/Users/juls/Desktop/BIAS- regression/compas_analysis/data/train_val_test/{}/{}_output_{}_test_seed_{}.csv".format(
-                dataset._name, dataset._name, dataset.outcome_type, seed))
+            "/Users/jsuarez/Documents/Personal/fairness_in_regression/data/train_val_test_standard/{}/{}_output_{}_{}_test_seed_{}.csv".format(
+                dataset._name, dataset._name, dataset.outcome_type, dataset._protected_att_name[0], seed))
         df_tst_c = pd.read_csv(
-            "/Users/juls/Desktop/BIAS- regression/compas_analysis/data/train_val_test/{}/{}_output_continuous_test_seed_{}.csv".format(
+            "/Users/jsuarez/Documents/Personal/fairness_in_regression/data/train_val_test_standard/{}/{}_output_continuous_test_seed_{}.csv".format(
                 dataset._name, dataset._name, seed))
 
         df_tra.rename(columns={'y': dataset.binary_label_name}, inplace=True)
@@ -145,8 +147,12 @@ def apply_c45_classifier(dataset, splits=10, mitigation=False, rand_state=1):
         sp_avg_outcome_n.append(
             compute_sp_avg_outcome(normalised_results, X_test[dataset.protected_att_name[0]].values.tolist(),
                                    dataset.privileged_classes[0][0]))
+        sp_avg_outcome.append(compute_sp_avg_outcome(results[column_predicted], X_test[dataset.protected_att_name[0]].values.tolist(),
+                                   dataset.privileged_classes[0][0]))
         y_test_normalised = normalisation(y_test, min_output, max_output)
         mae_n.append(mean_absolute_error(y_test_normalised, normalised_results))
+        mae.append(mean_absolute_error(y_test, results[column_predicted].values.tolist()))
+        mse.append(mean_squared_error(y_test_normalised, normalised_results))
 
         results_cm = cm(y_test, results)
         print(results_cm)
@@ -197,7 +203,10 @@ def apply_c45_classifier(dataset, splits=10, mitigation=False, rand_state=1):
                     'FN-TN': int(is_FN_greater_than_TN),
                     'FP-TP': int(is_FP_greater_than_TP),
                     'sp_avg_outcome_n': sp_avg_outcome_n,
-                    'mae_n': mae_n
+                    'mae_n': mae_n,
+                    'mae': mae,
+                    'mse_n': mse,
+                    'sp_avg_outcome': sp_avg_outcome
                     }
     df_metrics = pd.DataFrame(dict_metrics)
     print(df_metrics)

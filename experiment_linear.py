@@ -33,7 +33,7 @@ def run_experiment(dataset, mitigation, outcome, rand_state):
             raise AssertionError('not a valid outcome: ', outcome)
 
 
-outcomes = ['binary']  # , 'ordinal', 'binary'
+outcomes = ['continuous']  # , 'ordinal', 'binary', 'continuous'
 mitigation = [False]
 stats_results = True
 

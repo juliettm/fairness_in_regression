@@ -6,7 +6,7 @@ from aif360.metrics import BinaryLabelDatasetMetric, ClassificationMetric
 from sklearn.metrics import accuracy_score
 # metrics
 from sklearn.metrics import confusion_matrix as cm
-from sklearn.metrics import mean_absolute_error
+from sklearn.metrics import mean_absolute_error, mean_squared_error
 
 from datasets_processing.aif360datset import get_aif_dataset
 
@@ -85,21 +85,22 @@ def apply_c45_regressor(dataset, splits=10, mitigation=False, rand_state=1):
     didi_n = []
     didi_predicted_n = []
     deo = []
+    mse = []
 
     for num in range(0, 10):
 
         seed = 100 + num
 
         df_tra = pd.read_csv(
-            "/Users/juls/Desktop/BIAS- regression/compas_analysis/data/train_val_test/{}/{}_output_continuous_test_seed_{}.csv".format(
+            "/Users/jsuarez/Documents/Personal/fairness_in_regression/data/train_val_test_standard/{}/{}_output_continuous_test_seed_{}.csv".format(
                 dataset._name, dataset._name, seed))
 
         df_tst_c = pd.read_csv(
-            "/Users/juls/Desktop/BIAS- regression/compas_analysis/data/train_val_test/{}/{}_output_continuous_test_seed_{}.csv".format(
+            "/Users/jsuarez/Documents/Personal/fairness_in_regression/data/train_val_test_standard/{}/{}_output_continuous_test_seed_{}.csv".format(
                 dataset._name, dataset._name, seed))
         df_tst_b = pd.read_csv(
-            "/Users/juls/Desktop/BIAS- regression/compas_analysis/data/train_val_test/{}/{}_output_binary_test_seed_{}.csv".format(
-                dataset._name, dataset._name, seed))
+            "/Users/jsuarez/Documents/Personal/fairness_in_regression/data/train_val_test_standard/{}/{}_output_binary_{}_test_seed_{}.csv".format(
+                dataset._name, dataset._name, dataset._protected_att_name[0], seed))
 
         df_tra.rename(columns={'y': dataset.continuous_label_name}, inplace=True)
         df_tst_b.rename(columns={'y': dataset.binary_label_name}, inplace=True)
@@ -120,12 +121,14 @@ def apply_c45_regressor(dataset, splits=10, mitigation=False, rand_state=1):
         column_predicted = dataset.outcome_label + '_predicted'
         target_variable = dataset.outcome_label  # if binary else target_variable_ordinal
 
-        y_test = y_test_binary
+        y_test = y_test_ordinal
         favorable_label = dataset.favorable_label_binary
 
         clf = lr_estimator.fit(X_train, y_train)
         results_ = clf.predict(X_test)
         results = pd.DataFrame(results_, columns=[column_predicted])
+        print(results_)
+        print(y_test)
 
 
 
@@ -149,9 +152,13 @@ def apply_c45_regressor(dataset, splits=10, mitigation=False, rand_state=1):
         y_test_normalised = normalisation(y_test, min_v, max_v)
         mae_n.append(mean_absolute_error(y_test_normalised, normalised_results))
 
+        mse.append(mean_squared_error(y_test_normalised, normalised_results))
+
         # transforming the output to binary values
         # y_test_binary
         y_predicted_binary = dataset.continuous_to_binary(results[column_predicted])
+        print(y_predicted_binary)
+        print(y_test_binary)
 
 
         results_cm = cm(y_test_binary, y_predicted_binary)
@@ -159,6 +166,7 @@ def apply_c45_regressor(dataset, splits=10, mitigation=False, rand_state=1):
         acc = accuracy_score(y_test_binary, y_predicted_binary)
         print(acc)
         accuracies.append(acc)
+        # exit(0)
 
         ds_tra = get_aif_dataset(X_test, y_test_binary, label=dataset.binary_label_name,
                                  protected_attribute_names=dataset.protected_att_name,
@@ -194,6 +202,7 @@ def apply_c45_regressor(dataset, splits=10, mitigation=False, rand_state=1):
                     'ea': ea_,
                     'sp_avg_outcome_n': sp_avg_outcome_n,
                     'mae': mae,
+                    'mse_n': mse,
                     'mae_n': mae_n
                     }
     df_metrics = pd.DataFrame(dict_metrics)

@@ -17,7 +17,7 @@ def get_datasets(outcome):
         return [CompasDataset('race', outcome_type=outcome),
                 WineDataset('color', outcome_type=outcome),
                 SinglesDataset('sex', outcome_type=outcome),
-                TicDataset('religion', outcome_type=outcome),
+                #TicDataset('religion', outcome_type=outcome),
                 ObesityDataset('Gender', outcome_type=outcome),
                 DrugsDataset('Gender', outcome_type=outcome),
                 # Continuous
@@ -32,7 +32,7 @@ def get_datasets(outcome):
         return [CompasDataset('race', outcome_type=outcome),
                 WineDataset('color', outcome_type=outcome),
                 SinglesDataset('sex', outcome_type=outcome),
-                TicDataset('religion', outcome_type=outcome),
+                #TicDataset('religion', outcome_type=outcome),
                 ObesityDataset('Gender', outcome_type=outcome),
                 DrugsDataset('Gender', outcome_type=outcome)
                 ]

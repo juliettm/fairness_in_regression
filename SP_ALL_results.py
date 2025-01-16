@@ -31,21 +31,18 @@ merged_df = pd.merge(tree_data_renamed, linear_data_renamed, on=['dataset', 'att
 
 merged_df.head()
 
-# Removing 'accuracies' columns
-merged_df = merged_df.drop(['accuracies_tree', 'accuracies_linear'], axis=1)
+print(merged_df.columns)
+
 
 # Sorting columns as per the specified order: dataset, attribute, then linear values followed by tree values
 # and sorting the measures in the order of mae, sp_avg, and statistical_parity
-columns_order = [
-    'dataset', 'attribute', 'method',
-    'mse_n_linear', 'sp_avg_outcome_n_linear', 'statistical_parity_difference_linear',
-    'mse_n_tree', 'sp_avg_outcome_n_tree', 'statistical_parity_difference_tree'
-]
 
 columns_order = [
     'dataset', 'attribute', 'method',
-    'mse_n_linear', 'sp_avg_outcome_n_linear', 'statistical_parity_difference_linear',
-    'mse_n_tree', 'sp_avg_outcome_n_tree', 'statistical_parity_difference_tree'
+    'accuracies_linear', 'statistical_parity_difference_linear',
+    'mse_n_linear', 'sp_avg_outcome_n_linear',
+    'accuracies_tree', 'statistical_parity_difference_tree',
+    'mse_n_tree', 'sp_avg_outcome_n_tree'
 ]
 
 merged_df_sorted = merged_df[columns_order]
@@ -54,10 +51,11 @@ merged_df_sorted.head()
 
 # Removing the 'attribute' column and generating the LaTeX code for the updated dataframe
 merged_df_without_attribute = merged_df_sorted.drop('attribute', axis=1)
-latex_table_without_attribute = merged_df_without_attribute.to_latex(index=False)
+merged_df_without_attribute.sort_values(['dataset', 'method'], inplace=True)
+latex_table_without_attribute = merged_df_without_attribute.to_latex(index=False, float_format="%.3f", escape=False)
 
 print(latex_table_without_attribute)
-
+exit(0)
 
 # Sorting the datasets in the specified manner: first the specific set in alphabetical order,
 # followed by the rest in alphabetical order
@@ -74,20 +72,10 @@ rest_sorted = merged_df_without_attribute[merged_df_without_attribute['dataset']
 sorted_merged_df = pd.concat([specified_sorted, rest_sorted])
 
 # Generating the LaTeX code for the sorted dataframe
-sorted_latex_table = sorted_merged_df.to_latex(index=False, float_format="%.3f", escape=False)
+sorted_latex_table = sorted_merged_df.to_latex(index=False, escape=False)
 
 print(sorted_latex_table)
 
 exit(0)
 
-from scipy.stats import wilcoxon
-
-# Extracting the SP DAvgO values for linear and tree methods
-sp_avg_linear = sorted_merged_df['sp_avg_outcome_n_linear']
-sp_avg_tree = sorted_merged_df['sp_avg_outcome_n_tree']
-
-# Performing the Wilcoxon signed-rank test
-wilcoxon_test_result = wilcoxon(sp_avg_linear, sp_avg_tree)
-
-wilcoxon_test_result
 

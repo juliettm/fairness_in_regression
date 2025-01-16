@@ -9,7 +9,7 @@ from sklearn.linear_model import LinearRegression
 from sklearn.metrics import accuracy_score
 # metrics
 from sklearn.metrics import confusion_matrix as cm
-from sklearn.metrics import mean_absolute_error
+from sklearn.metrics import mean_absolute_error, mean_squared_error
 # training
 
 from datasets_processing.aif360datset import get_aif_dataset
@@ -72,6 +72,7 @@ def apply_lin_regression(dataset, splits=10, mitigation=False):
     false_discovery_rate_difference = []
     mae = []
     mae_n = []
+    mse = []
     mae_prob = []
     diff_err = []
     diff_err_prob = []
@@ -98,14 +99,14 @@ def apply_lin_regression(dataset, splits=10, mitigation=False):
 
         seed = 100 + num
         df_tra = pd.read_csv(
-            "/Users/juls/Desktop/BIAS- regression/compas_analysis/data/train_val_test_standard/{}/{}_output_continuous_train_seed_{}.csv".format(
+            "/Users/jsuarez/Documents/Personal/fairness_in_regression/data/train_val_test_standard/{}/{}_output_continuous_train_seed_{}.csv".format(
                 dataset._name, dataset._name, seed))
         df_tst_c = pd.read_csv(
-            "/Users/juls/Desktop/BIAS- regression/compas_analysis/data/train_val_test_standard/{}/{}_output_continuous_test_seed_{}.csv".format(
+            "/Users/jsuarez/Documents/Personal/fairness_in_regression/data/train_val_test_standard/{}/{}_output_continuous_test_seed_{}.csv".format(
                 dataset._name, dataset._name, seed))
         df_tst_b = pd.read_csv(
-            "/Users/juls/Desktop/BIAS- regression/compas_analysis/data/train_val_test_standard/{}/{}_output_binary_test_seed_{}.csv".format(
-                dataset._name, dataset._name, seed))
+            "/Users/jsuarez/Documents/Personal/fairness_in_regression/data/train_val_test_standard/{}/{}_output_binary_{}_test_seed_{}.csv".format(
+                dataset._name, dataset._name, dataset._protected_att_name[0], seed))
 
         df_tra.rename(columns={'y': dataset.continuous_label_name}, inplace=True)
         df_tst_c.rename(columns={'y': dataset.continuous_label_name}, inplace=True)
@@ -192,6 +193,8 @@ def apply_lin_regression(dataset, splits=10, mitigation=False):
         #ea_n.append(compute_ea(y_test_ordinal_normalized[dataset.continuous_label_name], results_normalized,
         #                       X_test[dataset.protected_att_name[0]].values.tolist(), dataset.privileged_classes[0][0]))
         mae_n.append(mean_absolute_error(y_test_ordinal_normalized[dataset.continuous_label_name], results_normalized))
+        mse.append(mean_squared_error(y_test_ordinal_normalized[dataset.continuous_label_name], results_normalized))
+
 
         #didi_n.append(didi(y_test_ordinal_normalized[dataset.continuous_label_name],
         #                   X_test[dataset.protected_att_name[0]].values.tolist(), dataset.privileged_classes[0][0],
@@ -241,6 +244,7 @@ def apply_lin_regression(dataset, splits=10, mitigation=False):
                     'average_predictive_value_difference': average_predictive_value_difference,
                     'false_discovery_rate_difference': false_discovery_rate_difference,
                     'mean_absolute_error': mae,
+                    'mae': mae,
                     'mean_absolute_error_prob': mae_prob,
                     'metrics': metrics_,
                     'sp_mi': sp_mi_,
@@ -257,6 +261,7 @@ def apply_lin_regression(dataset, splits=10, mitigation=False):
                     #'didi_n': didi_n,
                     #'didi_predicted_n': didi_predicted_n,
                     #'deo': deo,
+                    'mse_n': mse,
                     'mae_n': mae_n
                     }
     print(dict_metrics)

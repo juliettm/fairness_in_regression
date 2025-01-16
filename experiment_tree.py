@@ -4,10 +4,11 @@ import warnings
 import numpy as np
 import pandas as pd
 
-from datasets_processing.compas import CompasDataset
 from datasets_processing.datasets_utils import get_datasets
 from methods.c45_classification import apply_c45_classifier
 from methods.c45_regression import apply_c45_regressor
+
+
 
 
 warnings.filterwarnings("ignore")
@@ -35,15 +36,14 @@ def run_experiment(dataset, mitigation, outcome, rand_state):
             raise AssertionError('not a valid outcome: ', outcome)
 
 
-outcomes = ['continuous']  # , 'ordinal', 'binary'
+outcomes = ['continuous']  # , 'ordinal', 'binary', continuous
 mitigation = [False]
 stats_results = True
+
 
 for outcome in outcomes:
     for mit in mitigation:
         datasets = get_datasets(outcome)
-        # datasets = [CompasDataset('race', outcome_type=outcome)]
-        # datasets = [WineDataset('color', outcome_type=outcome)]
         for dataset in datasets:
             print(dataset, outcome, mit)
             appended_results = []

@@ -13,7 +13,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
 # metrics
 from sklearn.metrics import confusion_matrix as cm
-from sklearn.metrics import mean_absolute_error
+from sklearn.metrics import mean_absolute_error, mean_squared_error
 
 
 from datasets_processing.aif360datset import get_aif_dataset
@@ -90,6 +90,7 @@ def apply_ord_regression(df_base, splits=10, mitigation=False):
     false_discovery_rate_difference = []
     sub_models = []
     mae = []
+    mse = []
     mae_n = []
     diff_err = []
     sp_mi_ = []
@@ -112,10 +113,10 @@ def apply_ord_regression(df_base, splits=10, mitigation=False):
 
         seed = 100 + num
         df_tra = pd.read_csv(
-            "/Users/juls/Desktop/BIAS- regression/compas_analysis/data/train_val_test_standard/{}/{}_output_continuous_train_seed_{}.csv".format(
+            "/Users/jsuarez/Documents/Personal/fairness_in_regression/data/train_val_test_standard/{}/{}_output_continuous_train_seed_{}.csv".format(
                 df_base._name, df_base._name, seed))
         df_tst = pd.read_csv(
-            "/Users/juls/Desktop/BIAS- regression/compas_analysis/data/train_val_test_standard/{}/{}_output_continuous_test_seed_{}.csv".format(
+            "/Users/jsuarez/Documents/Personal/fairness_in_regression/data/train_val_test_standard/{}/{}_output_continuous_test_seed_{}.csv".format(
                 df_base._name, df_base._name, seed))
 
 
@@ -264,6 +265,7 @@ def apply_ord_regression(df_base, splits=10, mitigation=False):
         didi_predicted_n.append(didi(results_normalized, X_test[df_base.protected_att_name[0]].values.tolist(),
                                      df_base.privileged_classes[0][0], min_v, max_v))
         mae_n.append(mean_absolute_error(y_test_ordinal_normalized, results_normalized))
+        mse.append(mean_squared_error(y_test_ordinal_normalized, results_normalized))
 
         y_test = y_test.to_frame()
         deo.append(compute_deo(y_test[df_base.continuous_label_name], results_n[predicted_variable_name],
@@ -307,6 +309,7 @@ def apply_ord_regression(df_base, splits=10, mitigation=False):
                     'average_predictive_value_difference': average_predictive_value_difference,
                     'false_discovery_rate_difference': false_discovery_rate_difference,
                     'mean_absolute_error': mae,
+                    'mae': mae,
                     'diff_err': diff_err,
                     'metrics': metrics_,
                     'sp_mi': sp_mi_,
@@ -323,6 +326,7 @@ def apply_ord_regression(df_base, splits=10, mitigation=False):
                     'didi_n': didi_n,
                     'didi_predicted_n': didi_predicted_n,
                     'deo': deo,
+                    'mse_n': mse,
                     'mae_n': mae_n
                     }
     print(dict_metrics)

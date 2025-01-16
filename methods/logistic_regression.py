@@ -9,7 +9,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
 # metrics
 from sklearn.metrics import confusion_matrix as cm
-from sklearn.metrics import mean_absolute_error
+from sklearn.metrics import mean_absolute_error, mean_squared_error
 
 from methods.regression_measures import compute_sp_avg_outcome, normalisation
 
@@ -67,21 +67,23 @@ def apply_log_regression(dataset, splits=10, mitigation=False, rand_state=1):
     average_odds_difference = []
     average_predictive_value_difference = []
     mae = []
+    mse = []
     mae_prob = []
     diff_err = []
     diff_err_prob = []
     acc_m = []
     false_discovery_rate_difference = []
     sp_avg_outcome_n = []
+    sp_avg_outcome = []
     mae_n = []
 
     for num in range(0, 10):
 
         seed = 100+num
-        train = pd.read_csv("/Users/juls/Desktop/BIAS- regression/compas_analysis/data/train_val_test_standard/{}/{}_output_{}_train_seed_{}.csv".format(dataset._name, dataset._name, dataset.outcome_type, seed))
+        train = pd.read_csv("/Users/jsuarez/Documents/Personal/fairness_in_regression/data/train_val_test_standard/{}/{}_output_{}_{}_train_seed_{}.csv".format(dataset._name, dataset._name, dataset.outcome_type, dataset._protected_att_name[0], seed))
 
-        test_b = pd.read_csv("/Users/juls/Desktop/BIAS- regression/compas_analysis/data/train_val_test_standard/{}/{}_output_{}_test_seed_{}.csv".format(dataset._name, dataset._name, dataset.outcome_type, seed))
-        test_o = pd.read_csv("/Users/juls/Desktop/BIAS- regression/compas_analysis/data/train_val_test_standard/{}/{}_output_continuous_test_seed_{}.csv".format(dataset._name, dataset._name, seed))
+        test_b = pd.read_csv("/Users/jsuarez/Documents/Personal/fairness_in_regression/data/train_val_test_standard/{}/{}_output_{}_{}_test_seed_{}.csv".format(dataset._name, dataset._name, dataset.outcome_type, dataset._protected_att_name[0], seed))
+        test_o = pd.read_csv("/Users/jsuarez/Documents/Personal/fairness_in_regression/data/train_val_test_standard/{}/{}_output_continuous_test_seed_{}.csv".format(dataset._name, dataset._name, seed))
 
 
         train.rename(columns={'y': dataset.binary_label_name}, inplace=True)
@@ -178,11 +180,14 @@ def apply_log_regression(dataset, splits=10, mitigation=False, rand_state=1):
 
         results_normalized = normalisation(ordinal_output, min_v, max_v)
         results_n = pd.DataFrame(results_normalized, columns=[column_predicted])
+        sp_avg_outcome.append(
+            compute_sp_avg_outcome(ordinal_output, X_test[dataset.protected_att_name[0]].values.tolist(),
+                                   dataset.privileged_classes[0][0]))
         sp_avg_outcome_n.append(
             compute_sp_avg_outcome(results_normalized, X_test[dataset.protected_att_name[0]].values.tolist(),
                                    dataset.privileged_classes[0][0]))
         mae_n.append(mean_absolute_error(y_test_ordinal_normalized[dataset.continuous_label_name], results_normalized))
-
+        mse.append(mean_squared_error(y_test_ordinal_normalized[dataset.continuous_label_name], results_normalized))
 
         results_cm = cm(y_test, results)
         print(results_cm)
@@ -207,8 +212,6 @@ def apply_log_regression(dataset, splits=10, mitigation=False, rand_state=1):
         print(res)
 
 
-
-
     if mitigation or dataset._outcome_original != 'ordinal':
         mae_prob = mae
         diff_err_prob = diff_err
@@ -222,10 +225,13 @@ def apply_log_regression(dataset, splits=10, mitigation=False, rand_state=1):
                     'average_predictive_value_difference': average_predictive_value_difference,
                     'false_discovery_rate_difference': false_discovery_rate_difference,
                     'mean_absolute_error': mae,
+                    'mae': mae,
                     'mean_absolute_error_prob': mae_prob,
                     'diff_err': diff_err,
                     'diff_err_prob': diff_err_prob,
                     'sp_avg_outcome_n': sp_avg_outcome_n,
+                    'sp_avg_outcome': sp_avg_outcome,
+                    'mse_n': mse,
                     'mae_n': mae_n
                     }
     df_metrics = pd.DataFrame(dict_metrics)
