@@ -52,8 +52,8 @@ def get_datasets(outcome):
                 ParkinsonDataset('sex', outcome_type=outcome),
                 CrimeDataset('race', outcome_type=outcome),
                 OlderAdultsDataset('sex', outcome_type=outcome),
-                #LsatDataset('race', outcome_type=outcome),
-                LsatDataset('gender', outcome_type=outcome),
+                LsatDataset('race', outcome_type=outcome),
+                # LsatDataset('gender', outcome_type=outcome),
                 StudentDataset('sex', outcome_type=outcome)
                 ]
     elif outcome == 'ordinal':
@@ -139,7 +139,12 @@ for dataset in datasets:
         sp_values[threshold] = sp
 
     # print(sp_values)
-    data_SP[dataset._name] = sp_values
+    #data_SP[dataset._name] = sp_values
+    #print(sp_values)
+    if dataset._name == "lsat":
+        data_SP['lsac'] = sp_values
+    else:
+        data_SP[dataset._name] = sp_values
 
 
 datasets = get_datasets('ordinal')
@@ -201,7 +206,11 @@ for dataset in datasets:
         sp_values[threshold] = sp
 
     #print(sp_values)
-    data_SP[dataset._name] = sp_values
+    if dataset._name == "lsat":
+        data_SP['lsac'] = sp_values
+    else:
+        data_SP[dataset._name] = sp_values
+
 
 print(data_SP)
 # Convert the dictionary to a DataFrame
@@ -212,7 +221,6 @@ print(df)
 df_T = pd.DataFrame(thres_SP).T
 print(df_T)
 
-exit(0)
 
 # Set a color palette (one color for each row)
 palette = sns.color_palette("tab20", len(df))
